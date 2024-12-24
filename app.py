@@ -8,7 +8,7 @@ app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})  # ปรับ CORS ตามความเหมาะสม
 
 # ตัวแปรเก็บข้อมูล
-current_target = "https://docs.google.com/forms/d/e/1FAIpQLSehlUyC6Gqmt0EHQ48xZY83nHX2ibqwpYcS7u7o5Kgf1jnUEQ/viewform"  # URL เริ่มต้น
+current_target = "https://www.youtube.com/watch?v=t_5oeT-TU4U"  # URL เริ่มต้น
 valid_tokens = {}
 TOKEN_EXPIRY_TIME = 60  # เวลาให้ QR Code หมดอายุ (วินาที)
 
