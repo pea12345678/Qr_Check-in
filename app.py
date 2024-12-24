@@ -1,5 +1,6 @@
 import os
 import time
+import uuid
 from flask import Flask, request, jsonify, redirect, render_template
 from flask_cors import CORS
 
@@ -28,9 +29,13 @@ def generate_qr():
     if not new_target or not isinstance(new_target, str):
         return jsonify({"error": "กรุณาระบุ URL เป้าหมายที่ถูกต้อง"}), 400
 
+    # ตรวจสอบ URL ให้แน่ใจว่าเป็น URL ที่ถูกต้อง
+    if not new_target.startswith("http"):
+        return jsonify({"error": "กรุณาระบุ URL ที่ถูกต้อง"}), 400
+
     # สร้าง Token ใหม่พร้อม timestamp
-    token = str(int(time.time()))
-    valid_tokens[token] = new_target
+    token = str(uuid.uuid4())  # ใช้ UUID แทน time.time()
+    valid_tokens[token] = {"target": new_target, "timestamp": time.time()}
     current_target = new_target
 
     return jsonify({
@@ -45,9 +50,9 @@ def redirect_to_target():
     token = request.args.get('token')
     if token in valid_tokens:
         # ตรวจสอบเวลา Token
-        token_timestamp = int(token)
-        if time.time() - token_timestamp < TOKEN_EXPIRY_TIME:
-            return redirect(valid_tokens[token])
+        token_data = valid_tokens[token]
+        if time.time() - token_data['timestamp'] < TOKEN_EXPIRY_TIME:
+            return redirect(token_data['target'])
         else:
             del valid_tokens[token]  # ลบ Token หมดอายุ
             return render_expired_page()
