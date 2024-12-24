@@ -33,7 +33,7 @@ def generate_qr():
 
     # ส่ง URL ใหม่ที่รวมกับ token
     return jsonify({
-        "qr_url": f"https://real1-l40z.onrender.com/redirect?token={token}",  # แก้ไขให้ใช้รูปแบบ dictionary
+        "qr_url": f"https://qr-check-in-k1oj.onrender.com/redirect?token={token}",  # แก้ไขให้ใช้รูปแบบ dictionary
         "message": "QR Code ใหม่ถูกสร้างเรียบร้อยแล้ว"
     })
 
