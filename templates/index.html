@@ -99,8 +99,8 @@
     <p id="countdown">QR Code จะรีเซ็ตในอีก 60 วินาที</p>
     <footer>Made with ❤️ by <strong>AKA_23Savge&Dreak</strong></footer>
 
-    <script>https://qr-check-in-k1oj.onrender.com
-        const API_URL = "https://qr-check-in-k1oj.onrender.com/generate"; // ใช้ URL ของแอปใน Render
+    <script>
+        const API_URL = "https://qr-check-in-k1oj.onrender.com/generate"; // URL ของ API
         const REFRESH_INTERVAL = 60; // ระยะเวลานับถอยหลัง (วินาที)
         let countdown = REFRESH_INTERVAL;
 
@@ -115,7 +115,7 @@
                 if (!response.ok) throw new Error("ไม่สามารถสร้าง QR Code ได้");
 
                 const data = await response.json();
-                return data.qr_url; // รับ URL ของ QR Code ใหม่
+                return data.qr_url; // URL ของ QR Code ใหม่
             } catch (error) {
                 console.error("Error fetching QR Code:", error);
                 alert("เกิดข้อผิดพลาดในการสร้าง QR Code");
@@ -126,17 +126,12 @@
         async function refreshQRCode() {
             const qrUrl = await fetchQRCode();
             if (qrUrl) {
-                QRCode.toDataURL(qrUrl, (error, dataUrl) => {
-                    if (error) {
-                        console.error("เกิดข้อผิดพลาดในการสร้าง QR Code:", error);
-                        document.getElementById("qrcode-img").alt = "ไม่สามารถโหลด QR Code ได้";
-                        document.getElementById("loading-text").textContent = "ไม่สามารถโหลด QR Code ได้";
-                    } else {
-                        document.getElementById("qrcode-img").src = dataUrl;
-                        document.getElementById("loading-text").style.display = 'none';
-                        console.log("QR Code สร้างเรียบร้อย");
-                    }
-                });
+                document.getElementById("qrcode-img").src = qrUrl;
+                document.getElementById("loading-text").style.display = 'none';
+                console.log("QR Code สร้างเรียบร้อย");
+            } else {
+                document.getElementById("qrcode-img").alt = "ไม่สามารถโหลด QR Code ได้";
+                document.getElementById("loading-text").textContent = "ไม่สามารถโหลด QR Code ได้";
             }
         }
 
@@ -164,7 +159,7 @@
 
         refreshQRCode(); // สร้าง QR Code ทันทีเมื่อเปิดหน้าเว็บ
         startCountdown(); // เริ่มต้นการนับถอยหลัง
-        setInterval(updateDatetime, 1000); // อัพเดตเวลาไทยทุกวินาที
+        setInterval(updateDatetime, 1000); // อัปเดตเวลาทุกวินาที
     </script>
 </body>
 </html>
