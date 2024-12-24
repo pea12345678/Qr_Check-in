@@ -115,6 +115,7 @@
                 if (!response.ok) throw new Error("ไม่สามารถสร้าง QR Code ได้");
 
                 const data = await response.json();
+                console.log("QR Code Data:", data); // ตรวจสอบข้อมูลที่ได้รับ
                 return data.qr_url; // URL ของ QR Code ใหม่
             } catch (error) {
                 console.error("Error fetching QR Code:", error);
