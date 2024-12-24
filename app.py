@@ -1,17 +1,17 @@
 import os
+import time
 from flask import Flask, request, jsonify, redirect, render_template
 from flask_cors import CORS
-import time
 
 app = Flask(__name__)
-CORS(app)  # เปิดใช้งาน CORS สำหรับแอปทั้งหมด
+CORS(app, resources={r"/*": {"origins": "*"}})  # ปรับ CORS ตามความเหมาะสม
 
+# ตัวแปรเก็บข้อมูล
 current_target = "https://docs.google.com/forms/d/e/1FAIpQLSehlUyC6Gqmt0EHQ48xZY83nHX2ibqwpYcS7u7o5Kgf1jnUEQ/viewform"  # URL เริ่มต้น
 valid_tokens = {}
+TOKEN_EXPIRY_TIME = 60  # เวลาให้ QR Code หมดอายุ (วินาที)
 
-TOKEN_EXPIRY_TIME = 60  # กำหนดเวลาให้ QR Code หมดอายุภายใน 1 นาที
 
-# Route สำหรับหน้าเริ่มต้น (สำหรับการทดสอบ)
 @app.route('/')
 def index():
     """Route สำหรับหน้าเริ่มต้น"""
@@ -20,39 +20,43 @@ def index():
 
 @app.route('/generate', methods=['POST'])
 def generate_qr():
+    """API สำหรับสร้าง QR Code ใหม่"""
     global current_target, valid_tokens
 
+    # รับ URL ใหม่จาก Request Body
     new_target = request.json.get('new_target')
-    if not new_target:
-        return jsonify({"error": "กรุณาระบุ URL เป้าหมาย"}), 400
+    if not new_target or not isinstance(new_target, str):
+        return jsonify({"error": "กรุณาระบุ URL เป้าหมายที่ถูกต้อง"}), 400
 
-    # สร้าง token ใหม่ทุกครั้งที่มีการอัปเดต URL
+    # สร้าง Token ใหม่พร้อม timestamp
     token = str(int(time.time()))
-    valid_tokens[token] = new_target  # เก็บ URL ใหม่ที่เกี่ยวข้องกับ token
+    valid_tokens[token] = new_target
     current_target = new_target
 
-    # ส่ง URL ใหม่ที่รวมกับ token
     return jsonify({
-        "qr_url": f"https://qr-check-in-k1oj.onrender.com/redirect?token={token}",  # แก้ไขให้ใช้รูปแบบ dictionary
+        "qr_url": f"https://qr-check-in-k1oj.onrender.com/redirect?token={token}",
         "message": "QR Code ใหม่ถูกสร้างเรียบร้อยแล้ว"
     })
 
 
 @app.route('/redirect', methods=['GET'])
 def redirect_to_target():
+    """Route สำหรับ Redirect ด้วย Token"""
     token = request.args.get('token')
     if token in valid_tokens:
-        # ตรวจสอบว่า token หมดอายุหรือไม่
-        if time.time() - float(token) < TOKEN_EXPIRY_TIME:
-            return redirect(valid_tokens[token])  # หาก token ยังไม่หมดอายุ ก็จะ redirect ไปที่ URL ที่เกี่ยวข้อง
+        # ตรวจสอบเวลา Token
+        token_timestamp = int(token)
+        if time.time() - token_timestamp < TOKEN_EXPIRY_TIME:
+            return redirect(valid_tokens[token])
         else:
-            del valid_tokens[token]  # ลบ token ที่หมดอายุออกจาก valid_tokens
-            return render_expired_page()  # เรียกใช้ฟังก์ชันแสดงหน้าเมื่อหมดอายุ
-    return render_expired_page()  # หากไม่พบ token ในระบบ
+            del valid_tokens[token]  # ลบ Token หมดอายุ
+            return render_expired_page()
+
+    return render_expired_page()  # หาก Token ไม่ถูกต้อง
 
 
 def render_expired_page():
-    """ฟังก์ชันสำหรับสร้างหน้า HTML เมื่อ QR Code หมดอายุ"""
+    """ฟังก์ชันแสดงหน้า QR Code หมดอายุ"""
     return """
     <!DOCTYPE html>
     <html lang="th">
@@ -101,6 +105,7 @@ def render_expired_page():
     <body>
        <h1>QR Code นี้หมดอายุ</h1>
         <p>โปรดสแกนใหม่อีกครั้ง</p>
+        <a href="/">กลับไปยังหน้าแรก</a>
     </body>
     </html>
     """, 403
