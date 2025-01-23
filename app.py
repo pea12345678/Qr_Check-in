@@ -6,7 +6,7 @@ import time
 app = Flask(__name__)
 CORS(app)  # เปิดใช้งาน CORS สำหรับแอปทั้งหมด
 
-current_target = "https://docs.google.com/forms/d/e/1FAIpQLSehlUyC6Gqmt0EHQ48xZY83nHX2ibqwpYcS7u7o5Kgf1jnUEQ/viewform"  # URL เริ่มต้น
+current_target = "https://script.google.com/macros/s/AKfycbxW6Ic14ePjqJyl3DpxnIK-WryZTO2xjaXypRZTY43mb04FH6RAFrwgmdHlIQPwBCxHrw/exec"  # URL เริ่มต้น
 valid_tokens = {}
 
 TOKEN_EXPIRY_TIME = 60  # กำหนดเวลาให้ QR Code หมดอายุภายใน 1 นาที
